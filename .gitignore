@@ -5,6 +5,8 @@ venv/
 env/
 .env
 
+resources/lid.176.bin
+
 # Build and packaging artifacts
 build/
 dist/
