@@ -15,12 +15,13 @@ A FastAPI microservice for language identification using FastText and the `lid.1
 
 Returns service health and model availability.
 
-### `GET /lid`
+### `POST /lid`
 
-Detects language from a `text` query parameter and returns the 5-best candidates.
+Detects language from a `text` query parameter and returns the k-best candidates.
 
 **Query parameter:**
 - `text` (string, required)
+- `k` (int, optional)
 
 ## Setup
 
@@ -67,14 +68,15 @@ Example response:
 {
   "status": "ok",
   "model_loaded": true,
-  "model_path": "/path/to/LID/resources/lid.176.bin"
+  "model_path": "/path/to/LID/resources/lid.176.bin",
+  "runtime_ms": 0.0014584511518478394
 }
 ```
 
 ### LID detection (top-5)
 
 ```bash
-curl "http://127.0.0.1:8004/lid?text=This%20is%20a%20test"
+curl -X POST "http://localhost:8004/lid"   -H "Content-Type: application/json"   -d '{"text": "This is my sentence", "k": 5}' 
 ```
 
 Example response:
@@ -88,6 +90,7 @@ Example response:
     {"lang": "fr", "score": 0.001},
     {"lang": "it", "score": 0.001}
   ]
+  "runtime_ms": 0.12083259359002113
 }
 ```
 

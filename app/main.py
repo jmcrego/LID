@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .health import LIDHealthResponse, health_endpoint
-from .lid import LIDResponse, lid_endpoint
+from .lid import LIDRequest, LIDResponse, lid_endpoint
 from . import shared
 
 
@@ -31,10 +31,9 @@ def health() -> LIDHealthResponse:
     return health_endpoint()
 
 
-@app.get("/lid", response_model=LIDResponse)
-def detect(text: str) -> LIDResponse:
-    return lid_endpoint(text=text, k=5)
-
+@app.post("/lid", response_model=LIDResponse)
+def detect(request: LIDRequest):
+    return lid_endpoint(request)
 
 app.add_middleware(
     CORSMiddleware,

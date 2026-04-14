@@ -11,13 +11,16 @@ class LIDCandidate(BaseModel):
     lang: str
     score: float
 
+class LIDRequest(BaseModel):
+    text: str
+    k: int = 1
 
 class LIDResponse(BaseModel):
     candidates: List[LIDCandidate]
     runtime_ms: float
 
 
-def lid_endpoint(text: str, k: int = 5) -> LIDResponse:
+def lid_endpoint(request: LIDRequest) -> LIDResponse:
     tic = time.perf_counter()
     with shared.model_lock:
         loaded_model = shared.model
@@ -25,11 +28,11 @@ def lid_endpoint(text: str, k: int = 5) -> LIDResponse:
     if loaded_model is None:
         raise HTTPException(status_code=503, detail="Model not loaded.")
 
-    if not text.strip():
+    if not request.text.strip():
         raise HTTPException(status_code=400, detail="Parameter 'text' must be non-empty.")
 
     # Use pybind directly to avoid fasttext wrapper/NumPy 2 copy=False incompatibility.
-    raw = loaded_model.f.predict(text, int(k), 0.0, "strict")
+    raw = loaded_model.f.predict(request.text, int(request.k), 0.0, "strict")
     candidates = [
         LIDCandidate(lang=label.replace("__label__", ""), score=float(prob))
         for prob, label in raw
